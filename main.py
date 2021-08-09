@@ -49,16 +49,45 @@
 #########################################
 #########################################
 
-from fastapi import BackgroundTasks, FastAPI
+# from fastapi import BackgroundTasks, FastAPI
+
+# app = FastAPI()
+
+# def write_notification(email: str, message=""):
+#     with open("log.txt", mode="w") as email_file:
+#         content = f"notification for {email}: {message}"
+#         email_file.write(content)
+
+# @app.post("/send-notification/{email}")
+# def send_notification(email: str, background_tasks: BackgroundTasks):
+#     background_tasks.add_task(write_notification, email, message="some notification")
+#     return {"message": "Notification sent in the background"}
+
+#########################################
+#########################################
+
+
+from fastapi import FastAPI
+import time
+import asyncio
 
 app = FastAPI()
 
-def write_notification(email: str, message=""):
-    with open("log.txt", mode="w") as email_file:
-        content = f"notification for {email}: {message}"
-        email_file.write(content)
+@app.get("/")
+async def home():
+    tasks = []
+    start = time.time()
+    for i in range(2):
+        tasks.append(asyncio.create_task(func1()))
+        tasks.append(asyncio.create_task(func2()))
+    response = await asyncio.gather(*tasks)
+    end = time.time()
+    return {"response": response, "time_taken": (end - start)}
 
-@app.post("/send-notification/{email}")
-def send_notification(email: str, background_tasks: BackgroundTasks):
-    background_tasks.add_task(write_notification, email, message="some notification")
-    return {"message": "Notification sent in the background"}
+async def func1():
+    await asyncio.sleep(2)
+    return "Func1() Completed"
+
+async def func2():
+    await asyncio.sleep(1)
+    return "Func2() Completed"
